@@ -12,7 +12,7 @@ WMWRE334X4TD85385	2004 Mini Cooper S
 4T1BG22K4XU447394	1999 Toyota Camry
 4T1BE32K43U773752	2003 Toyota Camry
 4T1BF32K03U042510	2003 Toyota Camry
-1N4AL11D06C147418 	2006 Nissan Altima (ìSLî package OPTION issue for Chrome and KBB).
+1N4AL11D06C147418 	2006 Nissan Altima (‚ÄúSL‚Äù package OPTION issue for Chrome and KBB).
 1HGCM81784A006917	2004 Honda Accord
 WUAPV54B33N904959	2003 Audi RS6
 WUAPV54B14N904959	2004 Audi RS6
@@ -119,7 +119,7 @@ SALME15486A216307	2006 Land Rover Range Rover HSE
 JM1FB3314B1234567	1981 Mazda RX7 Rotary engine (not in Edmunds/Chrome, found in Polk)
 4T1BK46K57U510460	2007 Toyota Camry
 wp0ab29912s686441	2002 Porsche 911
-1GCCS14B6E8143665 	1984 CHEVROLET ëSí Truck S10 PICKUP (2.8L 6Cyl)
+1GCCS14B6E8143665 	1984 CHEVROLET ‚ÄòS‚Äô Truck S10 PICKUP (2.8L 6Cyl)
 WP0AA29905S717346	2005 911 Carrera 2
 1FABP52U3KG254853	1989 Ford Taurus w/o options = Older KBB Vehicle example
 JM1FE173040107542	2004 Mazda 4dr Coupe
@@ -169,7 +169,7 @@ WDBUF72X99B393239	2009 Mercedes-Benz E-Class E550 Sedan 4D (white, with CPO as o
 ZFFUA13A4F0058289 	1985 Ferrari 308 GTS Convertible - only in Polk
 ZFFAA02A4C0040191	1982 Ferrari 308 Convertible - only in Polk
 ZAMFE39AX70031366	maserati Quattroporte - Did not explode in Chrome but did in AAX under USA not CA
-ZAMCE39A970027960	 ì					  ì  - Did not explode in Chrome but did in AAX under USA not CA
+ZAMCE39A970027960	 ‚Äú					  ‚Äú  - Did not explode in Chrome but did in AAX under USA not CA
 SCFAC24305B501804	Aston Martin Vanquish - Did not explode in Chrome but did in AAX under USA not CA
 ZHWBU37S28LA02715  	Lambo
 wp0ca29805u711700	2005 Porsche Boxter with MUTIPLE Chrome VIN Patterns for StyleID 268633
@@ -244,3 +244,4 @@ km8jm72dx9u104675	2009 Hyundai Tucson (CA)
 5nmsg13e67h006204	2007 Hyundai Santa Fe
 1fmzu35p3xuc23523	1999 Ford Explorer
 
+Test save
