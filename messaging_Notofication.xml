@@ -1,0 +1,32 @@
+<Notification>
+              <Email>
+                     <Email1>manish.singh@gmail.com</Email1>
+                     <Email2>manish.singh@harman.com</Email2>
+                     <Email3>manish.singh@yahoo.com </Email3>
+             </Email>
+             <Format>
+                      <AJK>
+                          <Dealerware>True</Dealerware >
+                          <FD-D2I-DXA>True</FD-D2I-DXA >
+                          < FD-D2I-DXB>True</ FD-D2I-DXB > 
+                       </ AJK >
+                       < FD-D2I-DXA >
+                              <Dealerware>True</Dealerware >
+                              <FD-D2I-DXB>True</FD-D2I-DXB >
+                              < FD-D2I-DXC>True</ FD-D2I-DXC > 
+                        </ FD-D2I-DXA >
+              </Format>
+               <ADFEmail>
+                          <Email1>manish.singh@gmail.com</Email1>
+                          <Email2>manish.singh@harman.com</Email2>
+                          <Email3>manish.singh@yahoo.com </Email3>
+               </ADFEmail>
+               <FromEmail> dealer@dealer.com</FromEmail>
+               <Message>
+                         <Message1>jhjkjkjnkjnkn</Message1>
+                         <Message1>jhjkjkjnkjfgdnkn</Message1>
+                         <Message1>jhjkjkjnkfghfjnkn</Message1
+              </Message>
+</Notification>
+
+Prateek
