@@ -1,0 +1,410 @@
+Check Records On Customer Folders Page		
+	[Arguments]		${Global_Dict}				${List_Compliance}			${ComplianceSleep}
+	Sleep 				${ComplianceSleep}
+	Log Dictionary		${Global_Dict}
+	
+	Log List 					${List_Compliance}	
+	${CountCust}= 				Get Length 		${List_Compliance}			
+	${CountCustStat}=			Run Keyword And Return Status 		Evaluate 	${CountCust}<20
+	Run Keyword And Continue On Failure 	 		Run Keyword If 				'${CountCustStat}'!='True'			Fail 	Total requests sent for Validation on Customer Folders Page: ${CountCust}. For validating records on Customer Folders Page UI please send 20 requests at the maximum.		
+	
+	Run Keyword If 				'${CountCustStat}'=='True'		Unselect Frame
+	Run Keyword If 				'${CountCustStat}'=='True'		Navigate to Customer Folders
+	Run Keyword If 				'${CountCustStat}'=='True'		Wait Till All Records Are Shown On Customer Folders Page 		${Global_Dict}		${List_Compliance}
+	Run Keyword If 				'${CountCustStat}'=='True'		Validate Customer Folders Page 							${Global_Dict}				${List_Compliance}
+
+
+Wait Till All Records Are Shown On Customer Folders Page 		[Arguments]	${Global_Dict}		${List_Compliance}
+	Log Dictionary		${Global_Dict}
+	Log List 			${List_Compliance}
+	
+	@{FS}= 		Create List
+	@{LS}= 		Create List
+	
+	${FS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		First Name
+	${LS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		Last Name
+	${MS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		Middle Name
+	
+	Log List 		${FS}
+	Log List 		${LS}
+	Log List 		${MS}
+
+	${C_FS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		CoApp First Name
+	${C_LS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		CoApp Last Name
+	${C_MS}=		Get Data In List From Dictionary For A Key 		${Global_Dict}		${List_Compliance}		CoApp Middle Name
+	
+	Log List 		${C_FS}
+	Log List 		${C_LS}
+	Log List 		${C_MS}
+	
+	# Expected app names 
+	${len}=		Get Length 	${FS}
+	@{Expected_AppNameList}=	Create List
+	
+	:FOR 	${I} 	IN RANGE 	0 		${len}
+	\		${Appfistname}=		Get From List 		${FS}	${I}
+	\		${Applastname}=		Get From List 		${LS}	${I}
+	\		${AppMidname}=		Get From List 		${MS}	${I}
+	
+	\		${CoAppfistname}=		Get From List 		${C_FS}	${I}
+	\		${CoApplastname}=		Get From List 		${C_LS}	${I}
+	\		${CoAppMidname}=		Get From List 		${C_MS}	${I}
+	
+	\		${ExpName}=			Catenate 			SEPARATOR=		${Applastname}	,	${SPACE} 	${Appfistname}
+	\		${ExpName}=			Run Keyword If 		'${AppMidname}'!='${EMPTY}'		Catenate 			SEPARATOR=		${ExpName}		${SPACE}	${AppMidname}	.
+	\		...					ELSE 				Set Variable 	${ExpName}
+	
+	\		${ExpName}=			Run Keyword If 		'${CoApplastname}'!='${EMPTY}'	Catenate 			SEPARATOR=		${ExpName}		${SPACE}	(	${CoApplastname}	,	${SPACE}	${CoAppfistname}	)
+	\		...					ELSE 				Set Variable 	${ExpName}
+	\		Append To List 		${Expected_AppNameList}		${ExpName}
+	
+	# this list contaons all expected applicant names.
+	Log List 		${Expected_AppNameList}
+	
+	# converting to lower case
+	@{Expected_List}=		Create List
+	:FOR 	${I} 	IN RANGE 	0 		${len}
+	\		${name}=	Get From List 		${Expected_AppNameList}		${I}
+	\		${lower_name}=		Evaluate 	str('${name}').lower()
+	\		Append To List 	${Expected_List}	${lower_name}
+	
+	Log list		${Expected_List}
+	
+	${DELAY}=		Set Variable	90	#60
+	${TIME_FRACTION}=	Set Variable	5
+	
+	${COUNT}			Evaluate				${DELAY}/${TIME_FRACTION}
+	${COUNT}			Convert To Integer		${COUNT}
+	${SCAN}				Set Variable			0
+	
+	# Wait Until Keyword Succeeds    60s    3s    Page Should Contain Element    //table[@id='DataGridArchive']/tbody/tr[${ROW}]/td[4]/span    Credit score is not shown on Customer Archive Page.    loglevel=NONE
+	:For		${LOOP}		IN RANGE	1			${COUNT} + 1
+	\	Sleep				${TIME_FRACTION}s	
+	\	${Cust_List}=		Get Data On Customer Folders Page In A List		${len}		2
+	\	Log List 			${Cust_List}
+	\	Set Suite Variable 	${Cust_List}
+	\	Sort List 			${Expected_List}
+	\	Sort List 			${Cust_List}
+	\	Log List 			${Cust_List}
+	\	Log List 			${Expected_List}
+	\	${EXEC_STATUS}=		Run Keyword And Return Status 	Lists Should Be Equal 		${Expected_List}	${Cust_List}
+	\	Run Keyword If		'${EXEC_STATUS}'=='True'							Exit For Loop
+	\	...		ELSE		Navigate Again To Customer Folders Page
+	
+	
+	Run Keyword If		'${EXEC_STATUS}'!='True'	Fail 	All records are not shown on Customer Folders page.
+
+Get Data In List From Dictionary For A Key 		[Arguments]		${Global_Dict}		${List_Index}		${KeyName}
+	Log List 	${List_Index}	
+	${len}= 	Get Length		${List_Index}
+	Log 		${KeyName}
+	
+	@{CombineList}=		Create List
+	
+	:FOR 	${I} 	IN RANGE 	0 		${len}
+	\		${Index1}		Get From List 	${List_Index}	${I}
+	\		${Index}=		Convert To Integer 		${Index1}
+	\		${dict}=		Get From Dictionary 	${Global_Dict}		${Index}
+	\		${Keyvalue}=	Get From Dictionary 	${dict}				${KeyName}
+	\		Append To List 	${CombineList}			${Keyvalue}
+	
+	Log List 	${CombineList}	
+	[Return]	${CombineList}	
+	
+Get Data On Customer Folders Page In A List		[Arguments]		${No_Apps}	${Col}
+	${Data_List}=	Create List
+	
+	Unselect Frame
+	Wait Until Page Contains Element            //iframe[@id='iFrm']
+	Select Frame                                iFrm
+	Wait Until Page Contains Element            //frame[@name='main']
+	Select Frame                                main
+	sleep 										2s
+	Wait Until Keyword succeeds     60      10      Page Should Contain Element           //table[@id='RadGrid1_ctl00']/tbody	Table is not found on Customer Folders page 	loglevel=NONE
+	
+	# Log 			${CNT}
+	# ${CNT1}=		Evaluate 		${CNT}+2
+	
+	Log 			${No_Apps}
+	${CNT1}=		Evaluate 		${No_Apps}+1
+	
+	:For		${Row}		IN RANGE	1			${CNT1}
+	\	Log 	${Row}
+	\	Wait Until Keyword succeeds     60      10      Page Should Contain Element           //table[@id='RadGrid1_ctl00']/tbody/tr[${Row}]/td[${Col}]		Table is not found on Customer Folders page 	loglevel=NONE
+	\	${is_pass}=			Run Keyword And Return Status 		Get Text		//table[@id='RadGrid1_ctl00']/tbody/tr[${Row}]/td[${Col}]
+	\	Run Keyword If 		'${is_pass}'=='False'		Sleep 		2s
+	\	Wait Until Keyword succeeds     60      10      Page Should Contain Element           //table[@id='RadGrid1_ctl00']/tbody/tr[${Row}]/td[${Col}]		Table is not found on Customer Folders page 	loglevel=NONE
+	\	${ACT_Cust_SH1}=		Get Text		//table[@id='RadGrid1_ctl00']/tbody/tr[${Row}]/td[${Col}]
+	\	${ACT_Cust_SH}=		Evaluate	str('${ACT_Cust_SH1}').lower()
+	\	Run Keyword If 		'${ACT_Cust_SH}'=='None'			Fail			Unable to get value in Applicant column on Customer Folders Page. 
+	\	${ACT_Cust}=		Evaluate		str('${ACT_Cust_SH}').strip()
+	\	Append To List 		${Data_List}	${ACT_Cust}
+	
+	Log List 	${Data_List}
+	[Return] 	${Data_List}
+		
+
+Navigate Again To Customer Folders Page	
+	Unselect Frame
+	Wait Until Page Contains Element            //iframe[@id='iFrm']		error=Navigate to Customer Folder page is not successful. Page is not loaded correctly. Please check.
+	Select Frame                                iFrm
+	Wait Until Page Contains Element            //frame[@name='nav']
+	Select Frame                                nav
+	
+	Wait Until Keyword Succeeds               120s                   3s                   Page Should Contain Element            //a[@id='tabReportsA']			Reports tab is not found. 	loglevel=NONE
+	# sleep 	3s
+	Execute Javascript                          window.document.getElementById('tabReportsA').onclick()
+	# sleep										5s
+	Wait Until Keyword Succeeds               120s                   3s                   Page Should Contain Element             //a[@id='AutoComply'] 			loglevel=NONE
+	Press Key									//a[@id='AutoComply']				\\13
+	# sleep	3s
+	Wait Until Keyword Succeeds               120s		3s			Page Should Contain Element             //a[@id='CustomerFiles'] 			loglevel=NONE
+	Press Key									//a[@id='CustomerFiles']				\\13
+	# sleep	3s
+	
+	Wait Until Keyword Succeeds               120s                   3s                   Page Should Contain Element             //*[text()='Customer Folders']  	Customer Folders Page is not loaded. Text Customer Folders is not shown on page.		loglevel=NONE
+	Unselect Frame
+	
+	Wait Until Page Contains Element            //iframe[@id='iFrm']		error=Navigate to Customer Folder page is not successful. Page is not loaded correctly. Please check.
+	Select Frame                                iFrm
+	Wait Until Page Contains Element            //frame[@name='main']
+	Select Frame                                main
+	
+Validate Customer Folders Page 					[Arguments]		${Global_Dict}				${List_Compliance}	
+	Log Dictionary		${Global_Dict}
+	Log List 			${List_Compliance}
+	Unselect Frame
+	# Check if any Credit App xml is processed		#HERE
+	${GB_Len}=	Get Length 		${Global_Dict}
+	:FOR 	${I} 	IN RANGE 	0 		${GB_Len}
+	\		${dict}=		Get From Dictionary 	${Global_Dict}		${I}
+	\		${TS_Code_App}=		Run Keyword And Return Status	Dictionary Should Contain Item 		${dict}		TransCode 	1
+	\		Run Keyword If 		'${TS_Code_App}'=='True'	Exit For Loop
+	
+	Run Keyword If 		'${TS_Code_App}'=='True'	Navigate To My Leads
+	${MyLeadLen}=		Get Length 		${List_LeadsSummary}
+	@{MyLeads_Cust}=	Create List
+	@{status_list}= 	Create List
+	${MyLeads_Cust}=	Run Keyword If 		'${TS_Code_App}'=='True'	Get Customers On My Leads Page In A List		${MyLeadLen}
+	${status_list}=		Run Keyword If 		'${TS_Code_App}'=='True'	Get Data On My Leads Page In A List				${MyLeadLen}	9
+	
+	Set Suite Variable 		${MyLeads_Cust}
+	Set Suite Variable 		${status_list}
+	
+	Unselect Frame
+	# Navigate to the page
+	Navigate To Customer Folders
+
+	# Log Dictionary		${Global_Dict}
+	# Log List 			${List_Compliance}
+	
+	${len}=		Get Length 		${List_Compliance}
+	
+	# Making list of records shown on UI
+	${Cust_List}=		Get Data On Customer Folders Page In A List		${len}		2
+	Log List 			${Cust_List}
+	Set Suite Variable 	${Cust_List}
+	
+	# ## Get Data From My leads page for Credit App
+	# ${MyLeadsLen}=		Get Length 		${List_LeadsSummary}
+	# Run Keyword If 			
+	
+	
+	:FOR 	${I} 	IN RANGE 	0 		${len}
+	\		${Index1}		Get From List 	${List_Compliance}		${I}
+	\		${Index}=		Convert To Integer 		${Index1}
+	\		${dict}=		Get From Dictionary 	${Global_Dict}		${Index1}
+	\		Validate Dictionary Data With Customer Folders Page 	 ${dict}	${Cust_List}	${Index}
+	
+	# Log Dictionary			${Lead_Summary_Dict}		WARN
+
+Validate Dictionary Data With Customer Folders Page 	 [Arguments]	${Dict_Records}	${Cust_List}	${Index}	
+	Log Dictionary			${dict}
+	Log List 				${Cust_List}
+	Log 					${Index}
+	
+	# Applicant 
+	${AppFirstName}=	Get From Dictionary		${Dict_Records}		First Name
+	${AppLastName}=		Get From Dictionary		${Dict_Records}		Last Name
+	${AppMidName}=		Get From Dictionary		${Dict_Records}		Middle Name
+	${AppNameSH}=		Catenate 		SEPARATOR=		${AppLastName}		,		${SPACE}		${AppFirstName}
+	${AppNameSH}=		Run Keyword If 	'${AppMidName}'!='${EMPTY}' 	Catenate 		SEPARATOR=		${AppNameSH}	${SPACE}	${AppMidName}	.
+	...					ELSE 			Set Variable 	${AppNameSH}
+	${AppName}=			Evaluate 		str('${AppNameSH}').lower()	
+	
+	# Co-App 
+	${COAppFirstName}=	Get From Dictionary		${Dict_Records}		CoApp First Name
+	${COAppLastName}=	Get From Dictionary		${Dict_Records}		CoApp Last Name
+	${COAppMidName}=	Get From Dictionary		${Dict_Records}		CoApp Middle Name
+	${COAppNameSH}=		Run Keyword If 	'${COAppLastName}'!='${EMPTY}'	Catenate 		SEPARATOR=		${COAppLastName}		,		${SPACE}		${COAppFirstName}
+	...					ELSE		Set Variable 	${EMPTY}
+	${COAppNameSH}=		Run Keyword If 	'${COAppLastName}'!='${EMPTY}' and '${COAppMidName}'!='${EMPTY}' 	Catenate 		SEPARATOR=		${COAppNameSH}	${SPACE}	${COAppMidName}		.
+	...					ELSE 			Set Variable 	${COAppNameSH}
+	${COAppName}=		Evaluate 		str('${COAppNameSH}').lower()	
+	
+	# ${CNT_MATCH}= 	Get Match Count 		${Cust_List}	${AppName}	
+	
+	${RecordToSearch}=	Run Keyword If 		'${COAppName}'!='${EMPTY}'		Catenate 	SEPARATOR=	${AppName}		${SPACE}	(	${COAppName}	)
+	...					ELSE 				Set Variable 					${AppName}
+	
+	
+	# get row no for particular record
+	${Indx}=			Get Index From List 			${Cust_List}	${RecordToSearch}
+	${Indx}=			Convert To Integer				${Indx}
+	Run Keyword If 		'${Indx}'=='-1'		Fail 		No new record is found on UI for ${RecordToSearch}
+	
+	# get row number
+	${Row_No}=				Evaluate 		${Indx}+1
+	
+	# now record details are compared with all columns of that UI row. 
+	Verify Columns On Customer Folders Page For Row 	${Row_No}	${Dict_Records}		${Index}
+	
+	# Come back to Cust folders page
+	# Navigate To Customer Folders
+	
+	Press Key 		//a[@href='../dealsummary/CustomerFolder.aspx']		\\13
+	# Sleep 	1s
+	Wait Until Keyword Succeeds       120s    3s         Page Should Contain Element            //table[@id='RadGrid1_ctl00']	loglevel=None	
+	
+	
+Verify Columns On Customer Folders Page For Row 	[Arguments]		${Row_No}	${Record}		${Index}	
+	Log 	${Row_No}
+	Log 	${Record}
+	${Row}= 	Set Variable 	${Row_No}
+	
+	${TransCode1}=		Get From Dictionary 	${Record}		TransCode
+	${TransCode}=		Convert To Integer 		${TransCode1}
+	
+	# Read data from UI for the row
+	Unselect Frame
+	
+	Wait Until Page Contains Element            //iframe[@id='iFrm']
+	Select Frame                                iFrm
+	Wait Until Page Contains Element            //frame[@name='main']
+	Select Frame                                main
+	
+	Wait Until Keyword Succeeds       120s    3s         Page Should Contain Element            //table[@id='RadGrid1_ctl00']	loglevel=None	
+	
+	# read date
+	${ROW}=		Convert To Integer		${ROW}
+	
+	# ${OnlyDate}= 	Get From List 	${Tlist}	0
+	${yyyy}	 ${mm} 	${dd}= 		Get Time 		year,month,day 
+	${dd}=	Convert To Integer 	${dd}
+	${mm}=	Convert To Integer 	${mm}
+	
+	${EXPDATE}=		Catenate 	SEPARATOR=/		${mm}	${dd}	${yyyy}
+	Log 		${EXPDATE}
+	
+	########## date ##############
+	# Date
+	Wait Until Keyword Succeeds      120s          3s        Page Should Contain Element        //table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[5]		Element not found:Date in table		loglevel=NONE
+	Wait Until Page Contains Element		//table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[1]		10s
+	# # # # Wait Until Element Is Visible			//table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[5]		10s
+	${ACT_DATE_SH}=		Get Text		//table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[5]
+	Run Keyword If 		'${ACT_DATE_SH}'=='None'			Fail			Unable to get value in Date column on Customer Folders Page. 
+	${ACT_DATE}=		Evaluate		str('${ACT_DATE_SH}').strip()
+	Run Keyword And Continue On Failure 	Should Be Equal As Strings			${EXPDATE}			${ACT_DATE}		Comparision of Date failed on Customer Folders page. Expected value: ${EXPDATE}. Actual Value: ${ACT_DATE}. 		values=False
+	
+	###########################################
+	# Click the link to go to documents page
+	Wait Until Keyword Succeeds 	60	3	Page Should Contain Element 	//table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[2]/a	Table element is not found on Customer Folders page.	loglevel=None
+	# Click link to open the details documents page
+	Press Key 		//table[@id='RadGrid1_ctl00']/tbody/tr[${ROW}]/td[2]/a 		\\13
+	
+	# wait till page opens
+	Wait Until Keyword succeeds        	60     10         Page Should Contain Element         //table[@id='CmplDetailRadGrid_ctl00']		Table is not found on Customer Folders details Page. 	loglevel=NONE	
+	
+	@{ActualDocList}=		Create List
+	
+	${filename_now}= 		Get From Dictionary		${Record}		Filename
+	Log 		--------------------------------------------	WARN
+	Log 		Filename: ${filename_now}		WARN
+	
+	
+	##########################################
+	# Get list of all actual documents
+	${Count}		Get Matching Xpath Count		//table[@id='CmplDetailRadGrid_ctl00']/tbody/tr
+	
+	:For	${I}		IN RANGE	1			${COUNT}+1
+	\		Wait Until Keyword succeeds        	60     10         Page Should Contain Element         //table[@id='CmplDetailRadGrid_ctl00']/tbody/tr[${I}]/td[2]/a	Table row not found on Customer Folder Page. 	loglevel=NONE
+	\		${text}=	Get Text				//table[@id='CmplDetailRadGrid_ctl00']/tbody/tr[${I}]/td[2]
+	\		Append To List 						${ActualDocList}		${text}
+	
+	Log List 	${ActualDocList}
+	
+	# List of expected documents
+	@{ExpectedDocList}=		Create List
+	
+	${ExpectedDocList}=		Create Expected List Of Compliance Documents	${Record}	${TransCode}        #Filename filename_now
+	Log List 		${ExpectedDocList}
+	
+	Sort List 	${ActualDocList}
+	Log List 	${ActualDocList}
+	Sort List 	${ExpectedDocList}
+	Log List 	${ExpectedDocList}
+	
+	# Run Keyword And Continue On Failure 	Lists Should Be Equal 		${ExpectedDocList} 		${ActualDocList}		Expected and Actual list of docuemnets do not match.
+	
+	${EXP_len}=		Get Length 		${ExpectedDocList}
+	Log 		Expected number of documents: ${EXP_len}		WARN
+	${ACT_len}=		Get Length 		${ActualDocList}
+	Log 		Actual number of documents: ${ACT_len}		WARN
+	
+	# compare
+	Run Keyword And Continue On Failure 		Should Be Equal 	${EXP_len}		${ACT_len}		Expected and Actual number of documents do not match. Expected number:${EXP_len}. Actual number: ${ACT_len}	
+	
+	
+	# Convert both lists to lower case
+	:FOR 		${I}	IN RANGE	0 	${EXP_len}
+	\			${doc}=		Get From List 		${ExpectedDocList}		${I}
+	\			${doc1}=	Evaluate 	str('${doc}').lower()
+	\			Set List Value 		${ExpectedDocList}		${I}	${doc1}
+	Log List 	${ExpectedDocList}
+	
+	:FOR 		${I}	IN RANGE	0 	${ACT_len}
+	\			${doc}=		Get From List 		${ActualDocList}		${I}
+	\			${doc1}=	Evaluate 	str('${doc}').lower()
+	\			Set List Value 		${ActualDocList}		${I}	${doc1}
+	Log List 	${ActualDocList}
+	
+	### Compare lists
+	:FOR 		${I}	IN RANGE	0 	${EXP_len}
+	\			${expdoc}=		Get From List 		${ExpectedDocList}		${I}
+	\			${is_CBR}=		Run Keyword And Return Status 		Should Contain 		${expdoc}		credit bureau report
+	\			${is_present}=		Run Keyword If 		'${is_CBR}'=='True'		Check CBR In Actual List		${ActualDocList}
+	\			...					ELSE		Run Keyword And Return Status 		List Should Contain Value 	${ActualDocList}		${expdoc}
+	\			Run Keyword And Continue On Failure 	Run Keyword If 		'${is_present}'=='False'		Fail 	Expected document is not found: ${expdoc}
+	
+	Run Keyword If 		'${is_present}'=='True'		Log 	Status: Pass 	WARN
+	...		ELSE 		Log 	Status: Fail 	WARN
+	
+	
+Create Expected List Of Compliance Documents	${Record}	${filename_now}        #Filename filename_now  
+
+	{file_txt}=    Replace String   ${filename_now}   xml  txt
+	{file_Loc}=  From Global Dict+  file_txt
+	fetching code for data from text file
+	Log 	Pref Set:${Pref_Set} 		
+	Set Suite Variable 		${Dict_Records}
+	
+	${AppFirstName}=	Get From Dictionary		${Dict_Records}		First Name
+	${AppLastName}=		Get From Dictionary		${Dict_Records}		Last Name
+	${AppMidName}=		Get From Dictionary		${Dict_Records}		Middle Name
+	
+	${COAppFirstName}=	Get From Dictionary		${Dict_Records}		CoApp First Name
+	${COAppLastName}=	Get From Dictionary		${Dict_Records}		CoApp Last Name
+	${COAppMidName}=	Get From Dictionary		${Dict_Records}		CoApp Middle Name
+	
+	Set Suite Variable 		${AppFirstName}
+	Set Suite Variable 		${AppLastName}
+	Set Suite Variable 		${AppMidName}
+	
+	Set Suite Variable 		${COAppFirstName}
+	Set Suite Variable 		${COAppLastName}
+	Set Suite Variable 		${COAppMidName}
+	
+	{App_Last_first}=  here write code fro 
+	{CoApp_Last_first}=  here write code fro 
+	
+	
