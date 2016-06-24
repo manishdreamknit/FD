@@ -1,10 +1,10 @@
 Click Subjectline
     [Arguments]   ${name}
 	log   ${name}
-	:FOR 	${I}			IN RANGE 		1 						20
+	:FOR 	${I}			IN RANGEing 		1 						20
 		\   ${test1}=    Catenate   //table[@class='F cf zt']/tbody/tr[   ${I}
 		\   ${test2}=    Catenate   ${test1}   ]/td[6]/div/div/div/span
-		\   ${text1}=    Get Text     xpath = ${test2}
+		\   ${text1}=    Get Text1     xpath = ${test2}
 		\   Log      ${text1}
 		\   Run Keyword If   '${text1}'=='${name}'       Click Element   xpath= ${test2}
 		
